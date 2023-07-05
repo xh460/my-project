@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.collageprogram.core.mapper.TTeamMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.collageprogram.core.entity.TTeam">
+        <id column="uid" property="uid"/>
+        <result column="userid" property="userid"/>
+        <result column="begin_time" property="beginTime"/>
+        <result column="begin_place" property="beginPlace"/>
+        <result column="content" property="content"/>
+        <result column="money" property="money"/>
+        <result column="status" property="status"/>
+        <result column="pay" property="pay"/>
+    </resultMap>
+    <insert id="saveTeamUser">
+        insert into t_team_user (teamid, username, pay, fund)
+        values (#{teamid}, #{username}, #{money}, 0)
+    </insert>
+    <insert id="saveBatchTeamUser">
+        insert into t_team_user (teamid, username) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{teamid}, #{item})
+        </foreach>
+    </insert>
+    <insert id="noticeTeamUserMsg" parameterType="java.lang.String">
+        insert into t_msg (teamid, msg, username)
+        values (#{teamid}, #{msg}, #{username})
+    </insert>
+    <insert id="addMoney">
+        update t_team_user
+        set pay = pay + #{money}
+        where t_team_user.teamid = #{teamid}
+          and t_team_user.username = #{username}
+    </insert>
+    <insert id="sendMsg">
+        insert into t_msg (username, msg)
+        values (#{userName}, #{msg})
+    </insert>
+    <update id="addAAA">
+        update t_team_user
+        set t_team_user.pay=#{money}
+        where t_team_user.teamid = #{treamid}
+    </update>
+
+    <update id="noticeTeamUser" parameterType="java.lang.String">
+        update t_team
+        set status = 1
+        where t_team.teamid = #{teamid}
+    </update>
+    <update id="payMoney">
+        update t_team_user
+        set fund = fund+ #{money}
+        where t_team_user.teamid = #{teamid}
+          and t_team_user.username = #{username}
+    </update>
+    <update id="updateTeamMoney">
+        update t_team
+        set money = #{money}
+        where t_team.teamid = #{teamod}
+    </update>
+    <update id="confim" parameterType="java.lang.String">
+        update t_team
+        set status = 1
+        where t_team.uid = #{teamid}
+    </update>
+    <update id="AA">
+        update t_team
+        set t_team.money=#{money}
+        where t_team.uid = #{treamid}
+    </update>
+    <select id="getTeamUser" resultType="com.collageprogram.core.entity.TUser"
+            parameterType="java.lang.String">
+        select t_team_user.username, t_team_user.fund as fundC
+        from t_team
+                 left join t_team_user on t_team.uid = t_team_user.teamid
+                 left join t_user
+                           on t_team_user.userid = t_user.uid
+        where t_team.uid = #{teamid}
+    </select>
+    <select id="getTeamUserPay" resultType="com.collageprogram.core.entity.TUser">
+        select t_team.*, t_team_user.fund==null?0:t_team_user.fund as fundC
+        from t_team
+            left join t_team_user
+        on t_team.uid = t_team_user.teamid left join t_user
+            on t_team_user.userid = t_user.uid
+        where t_team.uid = #{teamId}
+          and t_team.username = #{username}
+    </select>
+    <select id="getMyTeam" resultType="com.collageprogram.core.entity.TTeam" parameterType="java.lang.String">
+        select t_team.*, t_team_user.pay, t_team_user.fund as fund
+        from t_team
+                 left join t_team_user
+                           on t_team.uid = t_team_user.teamid
+                 left join t_user on t_team_user.userid = t_user.uid
+        where t_team_user.userid = #{userid}
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(*)
+        from t_team_user
+        where teamid = #{teamid}
+    </select>
+    <select id="selectFunds" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select sum(t_team_user.fund)
+        from t_team_user
+        where teamid = #{teamid}
+    </select>
+    <select id="getMyTeamByUserName" resultType="com.collageprogram.core.entity.actDetail">
+        select t_team.*, t_team_user.pay,t_user.user_name ,t_team_user.fund as fund
+        from t_team
+                 left join t_team_user
+                           on t_team.uid = t_team_user.teamid
+                 left join t_user on t_user.uid=t_team.userid
+        where t_team_user.username = #{userName}
+    </select>
+    <select id="queryActDetail" resultType="com.collageprogram.core.entity.actDetail">
+        SELECT tt.*,tu.user_name FROM `t_team` tt
+        join t_user tu on tt.userid = tu.uid
+    </select>
+
+</mapper>
